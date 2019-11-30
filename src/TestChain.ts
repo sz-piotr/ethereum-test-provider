@@ -1,5 +1,7 @@
 import VM from 'ethereumjs-vm'
 import Blockchain from 'ethereumjs-blockchain'
+import Block from 'ethereumjs-block'
+import { BN } from 'ethereumjs-util'
 import { utils } from 'ethers'
 import {
   Hardfork,
@@ -25,8 +27,12 @@ export class TestChain {
   }
 
   async getBlockNumber (): Promise<number> {
-    // TODO: implement
-    return 0
+    return new Promise((resolve, reject) => {
+      this.vm.blockchain.getLatestBlock((err: any, block: Block) => {
+        if (err) reject(err)
+        resolve(new BN(block.header.number).toNumber())
+      })
+    })
   }
 
   async getGasPrice (): Promise<utils.BigNumber> {
