@@ -5,8 +5,8 @@ describe('TestProvider', () => {
   it('sets the network correctly', async () => {
     const provider = new TestProvider()
     expect(await provider.getNetwork()).to.deep.equal({
-      name: 'test-provider',
-      chainId: 0,
+      name: 'test-chain',
+      chainId: 1337,
     })
   })
 
