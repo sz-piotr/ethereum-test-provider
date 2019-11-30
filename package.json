@@ -15,7 +15,9 @@
     "test": "mocha -r ts-node/register/transpile-only 'test/**/*.test.ts'",
     "lint": "eslint '{src,test}/**/*.ts'"
   },
-  "dependencies": {},
+  "dependencies": {
+    "ethers": "^4.0.0"
+  },
   "devDependencies": {
     "@types/chai": "^4.2.5",
     "@types/chai-as-promised": "^7.1.2",
