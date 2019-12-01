@@ -27,10 +27,15 @@ export class TestChain {
   }
 
   async getBlockNumber (): Promise<number> {
+    const block = await this.getLatestBlock()
+    return new BN(block.header.number).toNumber()
+  }
+
+  private async getLatestBlock (): Promise<Block> {
     return new Promise((resolve, reject) => {
       this.vm.blockchain.getLatestBlock((err: unknown, block: Block) => {
         if (err) reject(err)
-        resolve(new BN(block.header.number).toNumber())
+        resolve(block)
       })
     })
   }
