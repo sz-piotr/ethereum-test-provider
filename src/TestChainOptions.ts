@@ -5,8 +5,8 @@ export interface TestChainOptions {
   hardfork: Hardfork,
   privateKeys: string[],
   initialBalance: utils.BigNumber,
-  blockGasLimit: number,
-  defaultGasPrice: number,
+  blockGasLimit: utils.BigNumber,
+  defaultGasPrice: utils.BigNumber,
   coinbaseAddress: string,
 }
 
@@ -26,8 +26,8 @@ const DEFAULTS: TestChainOptions = {
     '0x7492f9da2b92d144da51bdfda426645f3af0f7388b2bd47ae9bf91cae111519a',
   ],
   initialBalance: utils.parseEther('100'),
-  blockGasLimit: 10_000_000,
-  defaultGasPrice: 1_000_000_000, // one gwei
+  blockGasLimit: utils.bigNumberify(10_000_000),
+  defaultGasPrice: utils.bigNumberify(1_000_000_000), // one gwei
   coinbaseAddress: '0xdEadBeEf00000000DeADBeef00000000dEAdBeeF',
 }
 

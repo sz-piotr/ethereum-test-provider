@@ -47,7 +47,7 @@ export class TestChain {
   }
 
   async getGasPrice (): Promise<utils.BigNumber> {
-    return utils.bigNumberify(this.options.defaultGasPrice)
+    return this.options.defaultGasPrice
   }
 
   async getBalance (address: Address, blockTag: BlockTag): Promise<utils.BigNumber> {

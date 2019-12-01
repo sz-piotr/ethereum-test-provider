@@ -9,6 +9,9 @@ const CHAIN_NAME = 'test-chain'
 export class TestProvider extends providers.BaseProvider {
   private chain: TestChain
 
+  constructor ()
+  constructor (chain: TestChain)
+  constructor (options: Partial<TestChainOptions>)
   constructor (chainOrOptions?: TestChain | Partial<TestChainOptions>) {
     super({ name: CHAIN_NAME, chainId: CHAIN_ID })
     if (chainOrOptions instanceof TestChain) {

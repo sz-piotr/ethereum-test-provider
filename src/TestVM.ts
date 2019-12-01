@@ -73,7 +73,7 @@ export class TestVM {
     const latestBlock = await this.getLatestBlock()
 
     const header: BlockHeaderData = {
-      gasLimit: this.options.blockGasLimit,
+      gasLimit: this.options.blockGasLimit.toHexString(),
       nonce: 42,
       timestamp: Math.floor(Date.now() / 1000),
       number: new BN(latestBlock.header.number).addn(1),
@@ -161,7 +161,7 @@ async function addGenesisBlock (vm: VM, options: TestChainOptions) {
     header: {
       bloom: '0x' + '0'.repeat(512),
       coinbase: options.coinbaseAddress,
-      gasLimit: options.blockGasLimit,
+      gasLimit: options.blockGasLimit.toHexString(),
       gasUsed: '0x00',
       nonce: 0x42,
       extraData: '0x1337',
