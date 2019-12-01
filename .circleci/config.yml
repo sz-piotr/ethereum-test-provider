@@ -1,6 +1,15 @@
 version: 2.1
 jobs:
-  lint_build_test:
+  node_10:
+    docker:
+      - image: circleci/node:10.17
+    steps:
+      - checkout
+      - run: yarn install --frozen-lockfile
+      - run: yarn lint
+      - run: yarn build
+      - run: yarn test
+  node_11:
     docker:
       - image: circleci/node:11.15
     steps:
@@ -9,8 +18,8 @@ jobs:
       - run: yarn lint
       - run: yarn build
       - run: yarn test
-
 workflows:
   all:
     jobs:
-      - lint_build_test
+      - node_11
+      - node_10
