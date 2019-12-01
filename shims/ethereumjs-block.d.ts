@@ -2,11 +2,15 @@ declare module 'ethereumjs-block' {
   import Blockchain from 'ethereumjs-blockchain'
   import Common from 'ethereumjs-common'
   import { BN, rlp } from 'ethereumjs-util'
+  import { Transaction } from 'ethereumjs-tx'
+  import Trie from 'merkle-patricia-tree'
 
   class Block {
     header: BlockHeader
     uncleList: BlockHeader[]
     raw: Buffer[]
+    transactions: Transaction[]
+    txTrie: Trie
     constructor(data?: SerializedBlock | Buffer | BlockData, opts?: BlockOpts)
 
     hash(): Buffer
@@ -30,7 +34,7 @@ declare module 'ethereumjs-block' {
     uncleHash: Buffer
     coinbase: Buffer
     stateRoot: Buffer
-    transactionTrie: Buffer
+    transactionsTrie: Buffer
     receiptTrie: Buffer
     bloom: Buffer
     difficulty: Buffer
@@ -39,6 +43,8 @@ declare module 'ethereumjs-block' {
     gasUsed: Buffer
     timestamp: Buffer
     extraData: Buffer
+    mixHash: Buffer
+    nonce: Buffer
     raw: Buffer[]
 
     canonicalDifficulty(parentBlock: Block): BN

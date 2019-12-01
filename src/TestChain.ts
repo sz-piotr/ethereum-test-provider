@@ -1,6 +1,3 @@
-import VM from 'ethereumjs-vm'
-import Blockchain from 'ethereumjs-blockchain'
-import Block from 'ethereumjs-block'
 import { BN } from 'ethereumjs-util'
 import { utils } from 'ethers'
 import {
@@ -17,27 +14,18 @@ import {
   BlockResponse,
   TransactionReceiptResponse,
 } from './model'
+import { FriendlyVM } from './FriendlyVM'
 
 export class TestChain {
-  private vm: VM
+  private vm: FriendlyVM
 
   constructor (hardfork?: Hardfork) {
-    const blockchain = new Blockchain({ hardfork })
-    this.vm = new VM({ blockchain })
+    this.vm = new FriendlyVM(hardfork)
   }
 
   async getBlockNumber (): Promise<number> {
-    const block = await this.getLatestBlock()
+    const block = await this.vm.getLatestBlock()
     return new BN(block.header.number).toNumber()
-  }
-
-  private async getLatestBlock (): Promise<Block> {
-    return new Promise((resolve, reject) => {
-      this.vm.blockchain.getLatestBlock((err: unknown, block: Block) => {
-        if (err) reject(err)
-        resolve(block)
-      })
-    })
   }
 
   async getGasPrice (): Promise<utils.BigNumber> {
@@ -61,7 +49,9 @@ export class TestChain {
   }
 
   async sendTransaction (signedTransaction: HexString): Promise<Hash> {
-    throw new Error('Not implemented!')
+    const hash = this.vm.addPendingTransaction(signedTransaction)
+    await this.vm.mineBlock()
+    return hash
   }
 
   async call (transaction: TransactionRequest, blockTag: BlockTag): Promise<HexString> {
