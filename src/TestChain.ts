@@ -1,4 +1,4 @@
-import { BN } from 'ethereumjs-util'
+import { bufferToInt, bufferToHex } from 'ethereumjs-util'
 import { FakeTransaction } from 'ethereumjs-tx'
 import { utils, Wallet, providers } from 'ethers'
 import {
@@ -33,7 +33,7 @@ export class TestChain {
 
   async getBlockNumber (): Promise<number> {
     const block = await this.vm.getLatestBlock()
-    return new BN(block.header.number).toNumber()
+    return bufferToInt(block.header.number)
   }
 
   async getGasPrice (): Promise<utils.BigNumber> {
@@ -106,16 +106,30 @@ export class TestChain {
     return utils.bigNumberify(result.gasUsed.toString())
   }
 
-  // NOTE: includeTransactions specifies that we resolve the transactions in the
-  // block to be TransactionResponse instead of hashes
-  async getBlockByNumber (blockTag: BlockTag, includeTransactions: boolean): Promise<BlockResponse> {
-    throw new Error('(getBlockByNumber) Not implemented!')
-  }
+  async getBlock (blockTagOrHash: BlockTag | Hash, includeTransactions: boolean): Promise<BlockResponse> {
+    if (blockTagOrHash === 'pending') {
+      throw new Error('Querying for "pending" block not supported.')
+    }
 
-  // NOTE: includeTransactions specifies that we resolve the transactions in the
-  // block to be TransactionResponse instead of hashes
-  async getBlockByHash (blockHash: Hash, includeTransactions: boolean): Promise<BlockResponse> {
-    throw new Error('(getBlockByHash) Not implemented!')
+    const block = blockTagOrHash === 'latest'
+      ? await this.vm.getLatestBlock()
+      : await this.vm.getBlock(blockTagOrHash)
+
+    // TODO: includeTransactions specifies that we resolve the transactions in the
+    // block to be TransactionResponse instead of hashes
+    return {
+      difficulty: bufferToInt(block.header.difficulty),
+      extraData: bufferToHex(block.header.extraData),
+      gasLimit: utils.bigNumberify(block.header.gasLimit),
+      gasUsed: utils.bigNumberify(block.header.gasUsed),
+      hash: bufferToHex(block.hash()),
+      miner: bufferToAddress(block.header.coinbase),
+      nonce: bufferToHex(block.header.nonce),
+      number: bufferToInt(block.header.number),
+      parentHash: bufferToHex(block.header.parentHash),
+      timestamp: bufferToInt(block.header.timestamp),
+      transactions: block.transactions.map(x => bufferToHex(x.hash())),
+    }
   }
 
   async getTransaction (transactionHash: Hash): Promise<TransactionResponse> {

@@ -44,11 +44,7 @@ export class TestProvider extends providers.BaseProvider {
       case 'estimateGas':
         return this.chain.estimateGas(params.transaction)
       case 'getBlock':
-        if (params.blockTag) {
-          return this.chain.getBlockByNumber(params.blockTag, params.includeTransactions)
-        } else {
-          return this.chain.getBlockByHash(params.blockHash, params.includeTransactions)
-        }
+        return this.chain.getBlock(params.blockTag ?? params.blockHash, params.includeTransactions)
       case 'getTransaction':
         return this.chain.getTransaction(params.transactionHash)
       case 'getTransactionReceipt':

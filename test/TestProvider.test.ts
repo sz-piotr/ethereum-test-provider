@@ -42,4 +42,23 @@ describe('TestProvider', () => {
     const balance = await other.getBalance()
     expect(balance.eq(utils.parseEther('10'))).to.equal(true)
   })
+
+  it('can get blocks', async () => {
+    const provider = new TestProvider()
+    const [wallet, other] = provider.getWallets()
+
+    const blockZero = await provider.getBlock(0)
+    expect(blockZero.number).to.equal(0)
+
+    await wallet.sendTransaction({
+      to: other.address,
+      value: utils.parseEther('10'),
+    })
+
+    const blockOne = await provider.getBlock(1)
+    expect(blockOne.transactions.length).to.equal(1)
+
+    const blockOneByHash = await provider.getBlock(blockOne.hash)
+    expect(blockOneByHash).to.deep.equal(blockOne)
+  })
 })

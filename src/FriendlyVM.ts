@@ -1,10 +1,10 @@
 import VM from 'ethereumjs-vm'
 import Blockchain from 'ethereumjs-blockchain'
 import Block, { BlockHeaderData } from 'ethereumjs-block'
-import { BN, toBuffer } from 'ethereumjs-util'
+import { BN, toBuffer, bufferToHex } from 'ethereumjs-util'
 import { Transaction } from 'ethereumjs-tx'
 import Account from 'ethereumjs-account'
-import { utils, Wallet } from 'ethers'
+import { Wallet } from 'ethers'
 import { Hash, HexString, Address } from './model'
 import { TestChainOptions } from './TestChainOptions'
 import Common from 'ethereumjs-common'
@@ -39,7 +39,7 @@ export class FriendlyVM {
   async addPendingTransaction (signedTransaction: HexString): Promise<Hash> {
     const transaction = new Transaction(signedTransaction, { common: await this.getCommon() })
     this.pendingTransactions.push(transaction)
-    return utils.hexlify(transaction.hash())
+    return bufferToHex(transaction.hash())
   }
 
   async mineBlock () {
@@ -51,6 +51,11 @@ export class FriendlyVM {
       block,
       generate: true,
       skipBlockValidation: true,
+    })
+    await new Promise((resolve, reject) => {
+      vm.blockchain.putBlock(block, (err: unknown, block: Block) =>
+        err != null ? reject(err) : resolve(block),
+      )
     })
   }
 
@@ -71,7 +76,7 @@ export class FriendlyVM {
       parentHash: latestBlock.hash(),
       coinbase: this.options.coinbaseAddress,
     }
-    const block = new Block({ header })
+    const block = new Block({ header }, { common: await this.getCommon() })
     block.validate = (blockchain, cb) => cb(null)
     block.header.difficulty = toBuffer(block.header.canonicalDifficulty(latestBlock))
 
@@ -81,7 +86,7 @@ export class FriendlyVM {
   private async addTransactionsToBlock (block: Block, transactions: Transaction[]) {
     block.transactions.push(...transactions)
     await new Promise((resolve, reject) => {
-      block.genTxTrie(err => err ? reject(err) : resolve())
+      block.genTxTrie(err => err != null ? reject(err) : resolve())
     })
     block.header.transactionsTrie = block.txTrie.root
   }
@@ -110,6 +115,18 @@ export class FriendlyVM {
     } finally {
       await psm.setStateRoot(initialStateRoot)
     }
+  }
+
+  async getBlock (hashOrNumber: string): Promise<Block> {
+    const vm = await this.getVM()
+    const query = hashOrNumber.length === 66
+      ? toBuffer(hashOrNumber)
+      : new BN(hashOrNumber.substr(2), 'hex')
+    return new Promise((resolve, reject) => {
+      vm.blockchain.getBlock(query, (err: unknown, block: Block) =>
+        err != null ? reject(err) : resolve(block),
+      )
+    })
   }
 }
 
@@ -142,7 +159,8 @@ async function addGenesisBlock (vm: VM, options: TestChainOptions) {
       coinbase: options.coinbaseAddress,
       gasLimit: options.blockGasLimit,
       gasUsed: '0x00',
-      nonce: 42,
+      nonce: 0x42,
+      extraData: '0x1337',
       number: 0,
       parentHash: '0x' + '0'.repeat(64),
       timestamp: 0,
@@ -150,8 +168,8 @@ async function addGenesisBlock (vm: VM, options: TestChainOptions) {
   }, { common: vm._common })
 
   await new Promise((resolve, reject) => {
-    vm.blockchain.putGenesis(genesisBlock, (err: unknown) => {
-      err ? reject(err) : resolve()
-    })
+    vm.blockchain.putGenesis(genesisBlock, (err: unknown) =>
+      err != null ? reject(err) : resolve(),
+    )
   })
 }

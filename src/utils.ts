@@ -1,4 +1,5 @@
 import { utils } from 'ethers'
+import { bufferToHex } from 'ethereumjs-util'
 
 export const bufferToAddress = (buffer: Buffer) =>
-  utils.getAddress(utils.hexlify(buffer))
+  utils.getAddress(bufferToHex(buffer))

@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { utils, providers } from 'ethers'
+import { utils } from 'ethers'
 
 export type Hardfork = 'byzantium' | 'constantinople' | 'petersburg' | 'istanbul'
 
@@ -73,8 +73,87 @@ export interface LogResponse {
   logIndex: number,
 }
 
-export type TransactionResponse = providers.TransactionResponse
+// https://github.com/ethers-io/ethers.js/blob/4ac08432b8e2c7c374dc4a0e141a39a369e2d430/src.ts/providers/base-provider.ts#L184
+export interface TransactionResponse {
+  hash: Hash,
+  blockHash?: Hash,
+  blockNumber?: number,
+  transactionIndex?: number,
+  confirmations?: number,
+  from: Address,
+  gasPrice: utils.BigNumber,
+  gasLimit: utils.BigNumber,
+  to?: Address,
+  value: utils.BigNumber,
+  nonce: number,
+  data: HexString,
+  r: HexString,
+  s: HexString,
+  v?: number,
+  creates?: Address,
+  raw?: HexString,
+  // https://github.com/ethers-io/ethers.js/blob/4ac08432b8e2c7c374dc4a0e141a39a369e2d430/src.ts/providers/base-provider.ts#L230
+  networkId?: number,
+}
 
-export type TransactionReceiptResponse = providers.TransactionReceipt
+export interface TransactionReceiptResponse {
+  to?: Address,
+  from?: Address,
+  contractAddress?: Address,
+  transactionIndex: number,
+  root?: Hash,
+  gasUsed: utils.BigNumber,
+  logsBloom?: HexString,
+  blockHash: Hash,
+  transactionHash: Hash,
+  logs: TransactionReceiptLogResponse[],
+  blockNumber: number,
+  confirmations?: number,
+  cumulativeGasUsed: utils.BigNumber,
+  status?: number,
+}
 
-export type BlockResponse = providers.Block
+// https://github.com/ethers-io/ethers.js/blob/4ac08432b8e2c7c374dc4a0e141a39a369e2d430/src.ts/providers/base-provider.ts#L301
+export interface TransactionReceiptLogResponse {
+  transactionLogIndex?: number,
+  transactionIndex: number,
+  blockNumber: number,
+  transactionHash: Hash,
+  address: Address,
+  topics: Hash[],
+  data: HexString,
+  logIndex: number,
+  blockHash: Hash,
+}
+
+export type BlockResponse = BlockResponseWithTxHashes | BlockResponseWithTxResponses
+
+// https://github.com/ethers-io/ethers.js/blob/4ac08432b8e2c7c374dc4a0e141a39a369e2d430/src.ts/providers/base-provider.ts#L259
+export interface BlockResponseWithTxHashes {
+  hash: Hash,
+  parentHash: Hash,
+  number: number,
+  timestamp: number,
+  nonce?: HexString,
+  difficulty: number,
+  gasLimit: utils.BigNumber,
+  gasUsed: utils.BigNumber,
+  miner: Address,
+  extraData: HexString,
+  transactions: Hash[],
+}
+
+// https://github.com/ethers-io/ethers.js/blob/4ac08432b8e2c7c374dc4a0e141a39a369e2d430/src.ts/providers/base-provider.ts#L277
+export interface BlockResponseWithTxResponses {
+  hash: Hash,
+  parentHash: Hash,
+  number: number,
+  timestamp: number,
+  nonce?: HexString,
+  difficulty: number,
+  gasLimit: utils.BigNumber,
+  gasUsed: utils.BigNumber,
+  miner: Address,
+  extraData: HexString,
+  transactions: TransactionResponse[],
+}
