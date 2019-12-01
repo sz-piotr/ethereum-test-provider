@@ -32,6 +32,10 @@ export class TestChain {
     return this.options.privateKeys.map(x => new Wallet(x, provider))
   }
 
+  async mineBlock () {
+    return this.vm.mineBlock()
+  }
+
   async getBlockNumber (): Promise<number> {
     const block = await this.vm.getLatestBlock()
     return bufferToInt(block.header.number)

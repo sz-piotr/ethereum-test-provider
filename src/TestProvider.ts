@@ -22,6 +22,10 @@ export class TestProvider extends providers.BaseProvider {
     return this.chain.getWallets(this)
   }
 
+  async mineBlock () {
+    return this.chain.mineBlock()
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async perform (method: string, params: any) {
     switch (method) {
