@@ -6,6 +6,7 @@ export interface TestChainOptions {
   privateKeys: string[],
   initialBalance: string,
   blockGasLimit: number,
+  minGasPrice: number,
   coinbaseAddress: string,
 }
 
@@ -26,6 +27,7 @@ const DEFAULTS: TestChainOptions = {
   ],
   initialBalance: utils.parseEther('100').toString(),
   blockGasLimit: 10_000_000,
+  minGasPrice: 1_000_000_000, // one gwei
   coinbaseAddress: '0xdEadBeEf00000000DeADBeef00000000dEAdBeeF',
 }
 

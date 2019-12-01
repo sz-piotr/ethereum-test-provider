@@ -19,7 +19,7 @@ export class TestProvider extends providers.BaseProvider {
   }
 
   getWallets () {
-    return this.chain.getWallets().map(x => x.connect(this))
+    return this.chain.getWallets(this)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

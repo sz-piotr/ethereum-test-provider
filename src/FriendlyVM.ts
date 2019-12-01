@@ -10,13 +10,9 @@ import { TestChainOptions } from './TestChainOptions'
 
 export class FriendlyVM {
   private vm?: Promise<VM>
-  private pendingTransactions: Transaction[] = []
+  pendingTransactions: Transaction[] = []
 
   constructor (private options: TestChainOptions) {
-  }
-
-  getWallets () {
-    return this.options.privateKeys.map(x => new Wallet(x))
   }
 
   private async getVM () {
