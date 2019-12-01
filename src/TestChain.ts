@@ -1,5 +1,4 @@
-import { bufferToInt, bufferToHex } from 'ethereumjs-util'
-import { FakeTransaction } from 'ethereumjs-tx'
+import { bufferToInt } from 'ethereumjs-util'
 import { utils, Wallet, providers } from 'ethers'
 import {
   Address,
@@ -12,6 +11,9 @@ import {
   TransactionResponse,
   BlockResponse,
   TransactionReceiptResponse,
+  toFakeTransaction,
+  toBlockResponse,
+  toTransactionResponse,
 } from './model'
 import { FriendlyVM } from './FriendlyVM'
 import { TestChainOptions, getOptionsWithDefaults } from './TestChainOptions'
@@ -86,20 +88,15 @@ export class TestChain {
     return hash
   }
 
-  async call (transaction: TransactionRequest, blockTag: BlockTag): Promise<HexString> {
+  async call (transactionRequest: TransactionRequest, blockTag: BlockTag): Promise<HexString> {
     throw new Error('(call) Not implemented!')
   }
 
-  async estimateGas (transaction: TransactionRequest): Promise<utils.BigNumber> {
-    const tx = new FakeTransaction({
-      from: transaction.from,
-      to: transaction.to,
-      data: transaction.data,
-      gasLimit: transaction.gasLimit?.toHexString() ?? this.options.blockGasLimit,
-      gasPrice: transaction.gasPrice?.toHexString(),
-      nonce: transaction.nonce,
-      value: transaction.value?.toHexString(),
-    })
+  async estimateGas (transactionRequest: TransactionRequest): Promise<utils.BigNumber> {
+    if (!transactionRequest.gasLimit) {
+      transactionRequest.gasLimit = utils.bigNumberify(this.options.blockGasLimit)
+    }
+    const tx = toFakeTransaction(transactionRequest)
     const result = await this.vm.runIsolatedTransaction(tx)
     return utils.bigNumberify(result.gasUsed.toString())
   }
@@ -113,21 +110,12 @@ export class TestChain {
       ? await this.vm.getLatestBlock()
       : await this.vm.getBlock(blockTagOrHash)
 
-    // TODO: includeTransactions specifies that we resolve the transactions in the
-    // block to be TransactionResponse instead of hashes
-    return {
-      difficulty: bufferToInt(block.header.difficulty),
-      extraData: bufferToHex(block.header.extraData),
-      gasLimit: utils.bigNumberify(block.header.gasLimit),
-      gasUsed: utils.bigNumberify(block.header.gasUsed),
-      hash: bufferToHex(block.hash()),
-      miner: bufferToAddress(block.header.coinbase),
-      nonce: bufferToHex(block.header.nonce),
-      number: bufferToInt(block.header.number),
-      parentHash: bufferToHex(block.header.parentHash),
-      timestamp: bufferToInt(block.header.timestamp),
-      transactions: block.transactions.map(x => bufferToHex(x.hash())),
+    const response = toBlockResponse(block)
+    if (includeTransactions) {
+      response.transactions = block.transactions
+        .map(tx => toTransactionResponse(tx, block))
     }
+    return response
   }
 
   async getTransaction (transactionHash: Hash): Promise<TransactionResponse> {

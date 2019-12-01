@@ -2,6 +2,9 @@
 import { utils } from 'ethers'
 import { Address, HexString, Hash } from './strings'
 import { TransactionResponse } from './TransactionResponse'
+import Block from 'ethereumjs-block'
+import { bufferToInt, bufferToHex } from 'ethereumjs-util'
+import { bufferToAddress } from '../utils'
 
 export type BlockResponse = BlockResponseWithTxHashes | BlockResponseWithTxResponses;
 
@@ -33,4 +36,20 @@ export interface BlockResponseWithTxResponses {
   miner: Address,
   extraData: HexString,
   transactions: TransactionResponse[],
+}
+
+export function toBlockResponse (block: Block): BlockResponse {
+  return {
+    difficulty: bufferToInt(block.header.difficulty),
+    extraData: bufferToHex(block.header.extraData),
+    gasLimit: utils.bigNumberify(block.header.gasLimit),
+    gasUsed: utils.bigNumberify(block.header.gasUsed),
+    hash: bufferToHex(block.hash()),
+    miner: bufferToAddress(block.header.coinbase),
+    nonce: bufferToHex(block.header.nonce),
+    number: bufferToInt(block.header.number),
+    parentHash: bufferToHex(block.header.parentHash),
+    timestamp: bufferToInt(block.header.timestamp),
+    transactions: block.transactions.map(x => bufferToHex(x.hash())),
+  }
 }
