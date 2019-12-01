@@ -1,6 +1,6 @@
 import { providers } from 'ethers'
-import { Hardfork } from './model'
 import { TestChain } from './TestChain'
+import { TestChainOptions } from './TestChainOptions'
 
 // chainId of 1337 is the default for private networks as per EIP-155
 const CHAIN_ID = 1337
@@ -9,13 +9,17 @@ const CHAIN_NAME = 'test-chain'
 export class TestProvider extends providers.BaseProvider {
   private chain: TestChain
 
-  constructor (chainOrFork?: TestChain | Hardfork) {
+  constructor (chainOrOptions?: TestChain | Partial<TestChainOptions>) {
     super({ name: CHAIN_NAME, chainId: CHAIN_ID })
-    if (chainOrFork instanceof TestChain) {
-      this.chain = chainOrFork
+    if (chainOrOptions instanceof TestChain) {
+      this.chain = chainOrOptions
     } else {
-      this.chain = new TestChain(chainOrFork)
+      this.chain = new TestChain(chainOrOptions)
     }
+  }
+
+  getWallets () {
+    return this.chain.getWallets().map(x => x.connect(this))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

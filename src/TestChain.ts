@@ -1,7 +1,6 @@
 import { BN } from 'ethereumjs-util'
 import { utils } from 'ethers'
 import {
-  Hardfork,
   Address,
   BlockTag,
   Hash,
@@ -15,12 +14,17 @@ import {
   TransactionReceiptResponse,
 } from './model'
 import { FriendlyVM } from './FriendlyVM'
+import { TestChainOptions, getOptionsWithDefaults } from './TestChainOptions'
 
 export class TestChain {
   private vm: FriendlyVM
 
-  constructor (hardfork?: Hardfork) {
-    this.vm = new FriendlyVM(hardfork)
+  constructor (options?: Partial<TestChainOptions>) {
+    this.vm = new FriendlyVM(getOptionsWithDefaults(options))
+  }
+
+  getWallets () {
+    return this.vm.getWallets()
   }
 
   async getBlockNumber (): Promise<number> {
@@ -33,11 +37,19 @@ export class TestChain {
   }
 
   async getBalance (address: Address, blockTag: BlockTag): Promise<utils.BigNumber> {
-    throw new Error('Not implemented!')
+    if (blockTag !== 'latest') {
+      throw new Error(`Unable to getBalance for blockTag = "${blockTag}". Only "latest" is supported.`)
+    }
+    const { balance } = await this.vm.getAccount(address)
+    return utils.bigNumberify(balance)
   }
 
   async getTransactionCount (address: Address, blockTag: BlockTag): Promise<number> {
-    throw new Error('Not implemented!')
+    if (blockTag !== 'latest') {
+      throw new Error(`Unable to getTransactionCount for blockTag = "${blockTag}". Only "latest" is supported.`)
+    }
+    const { nonce } = await this.vm.getAccount(address)
+    return utils.bigNumberify(nonce).toNumber()
   }
 
   async getCode (address: Address, blockTag: BlockTag): Promise<HexString> {
