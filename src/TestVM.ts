@@ -9,7 +9,11 @@ import { Hash, HexString, Address } from './model'
 import { TestChainOptions } from './TestChainOptions'
 import Common from 'ethereumjs-common'
 
-export class FriendlyVM {
+/**
+ * TestVM is a wrapper around ethereumjs-vm. It provides a promise-based
+ * interface and abstracts away weird ethereumjs specific details
+ */
+export class TestVM {
   private vm?: Promise<VM>
   pendingTransactions: Transaction[] = []
 

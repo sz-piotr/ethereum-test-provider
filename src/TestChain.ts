@@ -15,17 +15,22 @@ import {
   toBlockResponse,
   toTransactionResponse,
 } from './model'
-import { FriendlyVM } from './FriendlyVM'
+import { TestVM } from './TestVM'
 import { TestChainOptions, getOptionsWithDefaults } from './TestChainOptions'
 import { bufferToAddress } from './utils'
 
+/**
+ * TestChain wraps TestVM and provides an API suitable for use by a provider.
+ * It is separate from the provider so that there can be many provider instances
+ * using the same TestChain instance.
+ */
 export class TestChain {
-  private vm: FriendlyVM
+  private tvm: TestVM
   private options: TestChainOptions
 
   constructor (options?: Partial<TestChainOptions>) {
     this.options = getOptionsWithDefaults(options)
-    this.vm = new FriendlyVM(this.options)
+    this.tvm = new TestVM(this.options)
   }
 
   getWallets (provider?: providers.Provider) {
@@ -33,11 +38,11 @@ export class TestChain {
   }
 
   async mineBlock () {
-    return this.vm.mineBlock()
+    return this.tvm.mineBlock()
   }
 
   async getBlockNumber (): Promise<number> {
-    const block = await this.vm.getLatestBlock()
+    const block = await this.tvm.getLatestBlock()
     return bufferToInt(block.header.number)
   }
 
@@ -49,7 +54,7 @@ export class TestChain {
     if (blockTag !== 'latest') {
       throw new Error(`getBalance: Unsupported blockTag "${blockTag}". Use "latest".`)
     }
-    const { balance } = await this.vm.getAccount(address)
+    const { balance } = await this.tvm.getAccount(address)
     return utils.bigNumberify(balance)
   }
 
@@ -64,13 +69,13 @@ export class TestChain {
   }
 
   private async getLatestTransactionCount (address: Address): Promise<number> {
-    const { nonce } = await this.vm.getAccount(address)
+    const { nonce } = await this.tvm.getAccount(address)
     return bufferToInt(nonce)
   }
 
   private async getPendingTransactionCount (address: Address): Promise<number> {
     const txCount = await this.getLatestTransactionCount(address)
-    const transactionsFromAddress = this.vm.pendingTransactions
+    const transactionsFromAddress = this.tvm.pendingTransactions
       .filter(tx => bufferToAddress(tx.getSenderAddress()) === address)
       .length
     return txCount + transactionsFromAddress
@@ -85,8 +90,8 @@ export class TestChain {
   }
 
   async sendTransaction (signedTransaction: HexString): Promise<Hash> {
-    const hash = await this.vm.addPendingTransaction(signedTransaction)
-    await this.vm.mineBlock()
+    const hash = await this.tvm.addPendingTransaction(signedTransaction)
+    await this.tvm.mineBlock()
     return hash
   }
 
@@ -99,7 +104,7 @@ export class TestChain {
       transactionRequest.gasLimit = utils.bigNumberify(this.options.blockGasLimit)
     }
     const tx = toFakeTransaction(transactionRequest)
-    const result = await this.vm.runIsolatedTransaction(tx)
+    const result = await this.tvm.runIsolatedTransaction(tx)
     return utils.bigNumberify(result.gasUsed.toString())
   }
 
@@ -109,8 +114,8 @@ export class TestChain {
     }
 
     const block = blockTagOrHash === 'latest'
-      ? await this.vm.getLatestBlock()
-      : await this.vm.getBlock(blockTagOrHash)
+      ? await this.tvm.getLatestBlock()
+      : await this.tvm.getBlock(blockTagOrHash)
 
     const response = toBlockResponse(block)
     if (includeTransactions) {

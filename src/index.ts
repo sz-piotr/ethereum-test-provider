@@ -1,3 +1,10 @@
 export { TestProvider } from './TestProvider'
 export { TestChain } from './TestChain'
-export * from './model'
+export {
+  TransactionRequest,
+  FilterRequest,
+  LogResponse,
+  TransactionResponse,
+  BlockResponse,
+  TransactionReceiptResponse,
+} from './model'
