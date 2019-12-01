@@ -6,7 +6,6 @@ import {
   BlockTag,
   Hash,
   HexString,
-  HexStringNoZeroes,
   TransactionRequest,
   FilterRequest,
   LogResponse,
@@ -37,7 +36,7 @@ export class TestChain {
   }
 
   async getGasPrice (): Promise<utils.BigNumber> {
-    return utils.bigNumberify(this.options.minGasPrice)
+    return utils.bigNumberify(this.options.defaultGasPrice)
   }
 
   async getBalance (address: Address, blockTag: BlockTag): Promise<utils.BigNumber> {
@@ -62,8 +61,7 @@ export class TestChain {
 
   private async getLatestTransactionCount (address: Address): Promise<number> {
     const { nonce } = await this.vm.getAccount(address)
-    const txCount = utils.bigNumberify(nonce).toNumber()
-    return txCount
+    return bufferToInt(nonce)
   }
 
   private async getPendingTransactionCount (address: Address): Promise<number> {
@@ -78,7 +76,7 @@ export class TestChain {
     throw new Error('(getCode) Not implemented!')
   }
 
-  async getStorageAt (address: Address, position: HexStringNoZeroes, blockTag: BlockTag): Promise<HexString> {
+  async getStorageAt (address: Address, position: HexString, blockTag: BlockTag): Promise<HexString> {
     throw new Error('(getStorageAt) Not implemented!')
   }
 
