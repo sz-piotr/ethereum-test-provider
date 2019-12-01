@@ -145,7 +145,7 @@ async function initializeVM (options: TestChainOptions) {
 
 async function initAccounts (vm: VM, options: TestChainOptions) {
   const psm = vm.pStateManager
-  const balance = new BN(options.initialBalance).toBuffer()
+  const balance = new BN(options.initialBalance.toString()).toBuffer()
   for (const privateKey of options.privateKeys) {
     const { address } = new Wallet(privateKey)
     await psm.putAccount(toBuffer(address), new Account({ balance }))

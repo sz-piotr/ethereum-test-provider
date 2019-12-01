@@ -4,7 +4,7 @@ import { utils } from 'ethers'
 export interface TestChainOptions {
   hardfork: Hardfork,
   privateKeys: string[],
-  initialBalance: string,
+  initialBalance: utils.BigNumber,
   blockGasLimit: number,
   defaultGasPrice: number,
   coinbaseAddress: string,
@@ -25,7 +25,7 @@ const DEFAULTS: TestChainOptions = {
     '0x12a4fd3f2d9ad98ede42228b5a885c8adc95daf8c36eadb9aafe40cb3bbeb02e',
     '0x7492f9da2b92d144da51bdfda426645f3af0f7388b2bd47ae9bf91cae111519a',
   ],
-  initialBalance: utils.parseEther('100').toString(),
+  initialBalance: utils.parseEther('100'),
   blockGasLimit: 10_000_000,
   defaultGasPrice: 1_000_000_000, // one gwei
   coinbaseAddress: '0xdEadBeEf00000000DeADBeef00000000dEAdBeeF',
