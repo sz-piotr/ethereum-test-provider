@@ -1,4 +1,4 @@
-import { providers } from 'ethers'
+import { providers, Wallet } from 'ethers'
 import { TestChain } from './TestChain'
 import { TestChainOptions } from './TestChainOptions'
 
@@ -23,6 +23,10 @@ export class TestProvider extends providers.BaseProvider {
 
   getWallets () {
     return this.chain.getWallets(this)
+  }
+
+  createEmptyWallet () {
+    return Wallet.createRandom().connect(this)
   }
 
   async mineBlock () {
