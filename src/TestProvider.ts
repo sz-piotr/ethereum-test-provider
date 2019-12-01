@@ -9,7 +9,7 @@ const CHAIN_NAME = 'test-chain'
 export class TestProvider extends providers.BaseProvider {
   private chain: TestChain
 
-  constructor(chainOrFork?: TestChain | Hardfork) {
+  constructor (chainOrFork?: TestChain | Hardfork) {
     super({ name: CHAIN_NAME, chainId: CHAIN_ID })
     if (chainOrFork instanceof TestChain) {
       this.chain = chainOrFork
@@ -18,7 +18,8 @@ export class TestProvider extends providers.BaseProvider {
     }
   }
 
-  async perform(method: string, params: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async perform (method: string, params: any) {
     switch (method) {
       case 'getBlockNumber':
         return this.chain.getBlockNumber()

@@ -28,7 +28,7 @@ export class TestChain {
 
   async getBlockNumber (): Promise<number> {
     return new Promise((resolve, reject) => {
-      this.vm.blockchain.getLatestBlock((err: any, block: Block) => {
+      this.vm.blockchain.getLatestBlock((err: unknown, block: Block) => {
         if (err) reject(err)
         resolve(new BN(block.header.number).toNumber())
       })
@@ -59,11 +59,11 @@ export class TestChain {
     throw new Error('Not implemented!')
   }
 
-  async call(transaction: TransactionRequest, blockTag: BlockTag): Promise<HexString> {
+  async call (transaction: TransactionRequest, blockTag: BlockTag): Promise<HexString> {
     throw new Error('Not implemented!')
   }
 
-  async estimateGas(transaction: TransactionRequest): Promise<utils.BigNumber> {
+  async estimateGas (transaction: TransactionRequest): Promise<utils.BigNumber> {
     throw new Error('Not implemented!')
   }
 

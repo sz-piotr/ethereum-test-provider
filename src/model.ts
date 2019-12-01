@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { utils, providers } from 'ethers'
 
 export type Hardfork = 'byzantium' | 'constantinople' | 'petersburg' | 'istanbul'
@@ -72,14 +73,8 @@ export interface LogResponse {
   logIndex: number,
 }
 
-export interface TransactionResponse extends providers.TransactionResponse {
-  // TODO: Investigate what exactly has to be included in the result
-}
+export type TransactionResponse = providers.TransactionResponse
 
-export interface TransactionReceiptResponse extends providers.TransactionReceipt {
-  // TODO: Investigate what exactly has to be included in the result
-}
+export type TransactionReceiptResponse = providers.TransactionReceipt
 
-export interface BlockResponse extends providers.Block {
-  // TODO: Investigate what exactly has to be included in the result
-}
+export type BlockResponse = providers.Block
