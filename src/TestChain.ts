@@ -82,7 +82,10 @@ export class TestChain {
   }
 
   async getCode (address: Address, blockTag: BlockTag): Promise<HexString> {
-    throw new Error('(getCode) Not implemented!')
+    if (blockTag !== 'latest') {
+      throw new Error(`getCode: Unsupported blockTag "${blockTag}". Use "latest".`)
+    }
+    return this.tvm.getCode(address)
   }
 
   async getStorageAt (address: Address, position: HexString, blockTag: BlockTag): Promise<HexString> {

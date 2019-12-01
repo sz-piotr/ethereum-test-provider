@@ -102,6 +102,13 @@ export class TestVM {
     return account
   }
 
+  async getCode (address: Address) {
+    const vm = await this.getVM()
+    const psm = vm.pStateManager
+    const code = await psm.getContractCode(toBuffer(address))
+    return bufferToHex(code)
+  }
+
   async runIsolatedTransaction (transaction: Transaction) {
     const vm = await this.getVM()
     const psm = vm.pStateManager
