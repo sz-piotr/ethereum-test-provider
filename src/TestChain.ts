@@ -113,7 +113,7 @@ export class TestChain {
 
   async getBlock (blockTagOrHash: BlockTag | Hash, includeTransactions: boolean): Promise<BlockResponse> {
     if (blockTagOrHash === 'pending') {
-      throw new Error('Querying for "pending" block not supported.')
+      throw new Error('getBlock: Unsupported blockTag "pending".')
     }
 
     const block = blockTagOrHash === 'latest'
