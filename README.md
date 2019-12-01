@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/sz-piotr/ethereum-test-provider.svg?style=svg)](https://circleci.com/gh/sz-piotr/ethereum-test-provider)
+
 # Ethereum TestProvider
 
 An ethers provider used for testing applications using the ethereum blockchain.
