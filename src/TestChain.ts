@@ -43,7 +43,7 @@ export class TestChain {
 
   async getBalance (address: Address, blockTag: BlockTag): Promise<utils.BigNumber> {
     if (blockTag !== 'latest') {
-      throw new Error(`Unable to getBalance for blockTag = "${blockTag}". Only "latest" is supported.`)
+      throw new Error(`getBalance: Unsupported blockTag "${blockTag}". Use "latest".`)
     }
     const { balance } = await this.vm.getAccount(address)
     return utils.bigNumberify(balance)
@@ -55,9 +55,7 @@ export class TestChain {
     } else if (blockTag === 'pending') {
       return this.getPendingTransactionCount(address)
     } else {
-      throw new Error(
-        `Unable to getTransactionCount for blockTag = "${blockTag}". Only "latest" and "pending" are supported.`,
-      )
+      throw new Error(`getTransactionCount: Unsupported blockTag "${blockTag}". Use "latest" or "pending".`)
     }
   }
 
