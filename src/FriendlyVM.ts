@@ -7,6 +7,7 @@ import Account from 'ethereumjs-account'
 import { utils, Wallet } from 'ethers'
 import { Hash, HexString, Address } from './model'
 import { TestChainOptions } from './TestChainOptions'
+import Common from 'ethereumjs-common'
 
 export class FriendlyVM {
   private vm?: Promise<VM>
@@ -20,6 +21,11 @@ export class FriendlyVM {
     return this.vm
   }
 
+  async getCommon () {
+    const vm = await this.getVM()
+    return vm._common
+  }
+
   async getLatestBlock (): Promise<Block> {
     const vm = await this.getVM()
     return new Promise((resolve, reject) => {
@@ -30,21 +36,15 @@ export class FriendlyVM {
     })
   }
 
-  addPendingTransaction (signedTransaction: HexString): Hash {
-    const transaction = new Transaction(signedTransaction)
+  async addPendingTransaction (signedTransaction: HexString): Promise<Hash> {
+    const transaction = new Transaction(signedTransaction, { common: await this.getCommon() })
     this.pendingTransactions.push(transaction)
     return utils.hexlify(transaction.hash())
   }
 
   async mineBlock () {
-    const block = await this.getNextBlockTemplate()
-    block.transactions.push(...this.pendingTransactions)
+    const block = await this.getNextBlock(this.pendingTransactions)
     this.pendingTransactions = []
-
-    await new Promise((resolve, reject) => {
-      block.genTxTrie(err => err ? reject(err) : resolve())
-    })
-    block.header.transactionsTrie = block.txTrie.root
 
     const vm = await this.getVM()
     await vm.runBlock({
@@ -54,7 +54,13 @@ export class FriendlyVM {
     })
   }
 
-  private async getNextBlockTemplate (): Promise<Block> {
+  private async getNextBlock (transactions: Transaction[]) {
+    const block = await this.getEmptyNextBlock()
+    await this.addTransactionsToBlock(block, transactions)
+    return block
+  }
+
+  private async getEmptyNextBlock (): Promise<Block> {
     const latestBlock = await this.getLatestBlock()
 
     const header: BlockHeaderData = {
@@ -67,9 +73,17 @@ export class FriendlyVM {
     }
     const block = new Block({ header })
     block.validate = (blockchain, cb) => cb(null)
-
     block.header.difficulty = toBuffer(block.header.canonicalDifficulty(latestBlock))
+
     return block
+  }
+
+  private async addTransactionsToBlock (block: Block, transactions: Transaction[]) {
+    block.transactions.push(...transactions)
+    await new Promise((resolve, reject) => {
+      block.genTxTrie(err => err ? reject(err) : resolve())
+    })
+    block.header.transactionsTrie = block.txTrie.root
   }
 
   async getAccount (address: Address) {
@@ -78,11 +92,35 @@ export class FriendlyVM {
     const account = await psm.getAccount(toBuffer(address))
     return account
   }
+
+  async runIsolatedTransaction (transaction: Transaction) {
+    const vm = await this.getVM()
+    const psm = vm.pStateManager
+    const initialStateRoot = await psm.getStateRoot()
+
+    try {
+      const block = await this.getNextBlock([transaction])
+      const result = await vm.runTx({
+        block,
+        tx: transaction,
+        skipNonce: true,
+        skipBalance: true,
+      })
+      return result
+    } finally {
+      await psm.setStateRoot(initialStateRoot)
+    }
+  }
 }
 
 async function initializeVM (options: TestChainOptions) {
-  const blockchain = new Blockchain({ hardfork: options.hardfork, validate: false })
-  const vm = new VM({ hardfork: options.hardfork, blockchain })
+  const common = Common.forCustomChain('mainnet', {
+    chainId: 1337,
+    networkId: 2137,
+    name: 'test-chain',
+  }, options.hardfork)
+  const blockchain = new Blockchain({ common, validate: false })
+  const vm = new VM({ common, blockchain })
   await initAccounts(vm, options)
   await addGenesisBlock(vm, options)
   return vm

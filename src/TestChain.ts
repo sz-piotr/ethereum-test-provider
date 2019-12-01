@@ -1,4 +1,5 @@
 import { BN } from 'ethereumjs-util'
+import { FakeTransaction } from 'ethereumjs-tx'
 import { utils, Wallet, providers } from 'ethers'
 import {
   Address,
@@ -82,7 +83,7 @@ export class TestChain {
   }
 
   async sendTransaction (signedTransaction: HexString): Promise<Hash> {
-    const hash = this.vm.addPendingTransaction(signedTransaction)
+    const hash = await this.vm.addPendingTransaction(signedTransaction)
     await this.vm.mineBlock()
     return hash
   }
@@ -92,7 +93,17 @@ export class TestChain {
   }
 
   async estimateGas (transaction: TransactionRequest): Promise<utils.BigNumber> {
-    throw new Error('(estimateGas) Not implemented!')
+    const tx = new FakeTransaction({
+      from: transaction.from,
+      to: transaction.to,
+      data: transaction.data,
+      gasLimit: transaction.gasLimit?.toHexString() ?? this.options.blockGasLimit,
+      gasPrice: transaction.gasPrice?.toHexString(),
+      nonce: transaction.nonce,
+      value: transaction.value?.toHexString(),
+    })
+    const result = await this.vm.runIsolatedTransaction(tx)
+    return utils.bigNumberify(result.gasUsed.toString())
   }
 
   // NOTE: includeTransactions specifies that we resolve the transactions in the

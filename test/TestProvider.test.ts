@@ -37,6 +37,8 @@ describe('TestProvider', () => {
       value: utils.parseEther('10'),
     })
 
+    expect(await wallet.getTransactionCount()).to.equal(1)
+
     const balance = await other.getBalance()
     expect(balance.eq(utils.parseEther('10'))).to.equal(true)
   })
